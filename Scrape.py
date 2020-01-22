@@ -1,69 +1,66 @@
-# coding: utf-8
-
-import re, requests
+# coding:utf-8
+import re, time, requests
 from bs4 import BeautifulSoup
 
+DIR = f"D:\\Python\\MakeVirtualBlogArticle\\output\\417\\"
 AMEBLO = "https://ameblo.jp"
 
-def scrape(allArticles, BASEDIR):
-    for articles in allArticles:
-        for url in articles:
-            title = url.string
-            print(f"{BASEDIR}{title}")
-            with open(f"{BASEDIR}{title}.txt", "w") as file:
-                html = requests.get(url["href"]).content
-                soup = BeautifulSoup(html, "html.parser")
-                divs = soup.find("div", {"class", "articleText"})
-                text = getPlainText(str(divs)).strip()
-                print(f"Written file: {title}.txt")
-                file.write(text)
-    print("Complete to scrape")
-
-def getArticleList(listhtml):
-    urls = []
-    html = requests.get(listhtml)
-    html.encoding = html.apparent_encoding
-    soup = BeautifulSoup(html.content, "html.parser")
-    nextPage = soup.find("li", class_="skin-borderQuiet").a
+def getArticlesPage(html):
+    urls = [html]
     while True:
-        if isinstance(nextPage, type(None)):
-            print("Complete to get article list")
+        data = requests.get(html).content
+        soup = BeautifulSoup(data, "lxml")
+        nexts = soup.find("a", {"class", "skin-paginationNext skin-btnIndex js-paginationNext"})
+        if isinstance(nexts, type(None)):
+            print("Complete to get article page")
             return urls
         else:
-            urls.append(AMEBLO+nextPage["href"])
-            #print(AMEBLO+nextPage["href"])
-            html = requests.get(AMEBLO+nextPage["href"]).content
-            #print(html)
-            soup = BeautifulSoup(html, "html.parser")
-            #nextPage = None
-            # ここの、各ページの前の記事をほっていく部分で、前のページのaタグを見つけられていない
-            nextPage = soup.find("ul", class_="skin-paging")
-            print(nextPage)
+            urltmp = AMEBLO + nexts["href"]
+            urls.append(urltmp)
+            print(f"Append {urltmp}")
+            html = urltmp
+            time.sleep(1)
 
 
-def getUrl(articleList):
+def getArticle(articlePages):
     pages = []
-    for html in articleList:
-        code = requests.get(html).content
-        soup = BeautifulSoup(code, "html.parser")
-        text = soup.find_all("a", {"class", "contentTitle"})
-        pages.append(text)
-    print("Complete to get url")
+    for html in articlePages:
+        data = requests.get(html).content
+        soup = BeautifulSoup(data, "lxml")
+        text = soup.find_all("li", class_ = "skin-borderQuiet")
+        for t in text:
+            pages.append(t.find("a"))
+        print(f"OK: {html}")
+        time.sleep(1)
+    print("Complete to get articles")
     return pages
 
-def getPlainText(html):
-    cleanr = re.compile("<.*?>")
-    cleantext = re.sub(cleanr, "", html)
-    return cleantext
 
-if __name__=='__main__':
-    # request - test
-    # art = requests.get("https://trysail.jp")
-    # print(art.text)
-    URL = "https://ameblo.jp/natsukawashiinablog/entrylist.html"
-    DIR = "output/"
-    allArticles = getArticleList(URL)
-    print(allArticles)
-    pages = getUrl(allArticles)
-    print(pages)
-    scrape(pages, DIR)
+def getPlainText(data):
+    pattern = re.compile("<.*?>")
+    plain = re.sub(pattern, "", data)
+    return plain
+
+
+def scrape(articles):
+    no = 1
+    maxi = len(str(len(articles)))
+    for article in articles:
+        html = requests.get(AMEBLO + article["href"]).content
+        soup = BeautifulSoup(html, "lxml")
+        title = soup.find("a", class_ = "skinArticleTitle").text
+        div_text = soup.find("div", {"class", "skin-entryBody _1ZFA-GPs"})
+        text = getPlainText(str(div_text)).strip()
+        with open(f"{DIR}{str(no).zfill(maxi)}. {title}.txt", "w", encoding="utf-8") as file:
+            print(f"Written file: {title}.txt")
+            file.write(text)
+        no += 1
+        time.sleep(1)
+    print("Complete to scrape")
+
+if __name__ == "__main__":
+    url = "https://ameblo.jp/natsukawashiinablog/entrylist.html"
+    allArticlePage = getArticlesPage(url)
+    pages = getArticle(allArticlePage)
+    scrape(pages)
+
