@@ -51,16 +51,20 @@ def scrape(articles):
         title = soup.find("a", class_ = "skinArticleTitle").text
         div_text = soup.find("div", {"class", "skin-entryBody _1ZFA-GPs"})
         text = getPlainText(str(div_text)).strip()
-        with open(f"{DIR}{str(no).zfill(maxi)}. {title}.txt", "w", encoding="utf-8") as file:
-            print(f"Written file: {title}.txt")
+        # with open(f"{DIR}{str(no).zfill(maxi)}. {title}.txt", "w", encoding="utf-8") as file:
+        with open(f"{DIR}{str(no).zfill(maxi)}.txt", "w", encoding="utf-8") as file:
+            print(f"Written file: {str(no).zfill(maxi)}.txt")
             file.write(text)
         no += 1
         time.sleep(1)
     print("Complete to scrape")
 
 if __name__ == "__main__":
+    print("Start")
+    start_time = time.time()
     url = "https://ameblo.jp/natsukawashiinablog/entrylist.html"
     allArticlePage = getArticlesPage(url)
     pages = getArticle(allArticlePage)
     scrape(pages)
+    print(f"Finish. Elapsed time: {time.time() - start_time}")
 
