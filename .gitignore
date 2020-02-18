@@ -1,5 +1,6 @@
 *log
 *.txt
+*.dat
 getFile.py
 
 # Created by https://www.gitignore.io/api/python
