@@ -74,6 +74,7 @@ class MarkovTree:
         for path in files:
             with open(path, encoding = "utf-8") as f:
                 s = f.read()
+                s = re.sub("---+[\s\S]---+", "", s)
                 self.add_tree(s)
 
 if __name__ == "__main__":
