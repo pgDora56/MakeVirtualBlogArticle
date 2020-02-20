@@ -51,13 +51,21 @@ class MarkovTree:
         self.MAXI_CHAIN = maxi
 
     def add_tree(self, data):
+        lines = data.split("\n")
+        words = ["[START]"]
+        for line in lines:
+            words.extend(self.separate(line))
+            words.append("[NEWLINE]")
+        words[-1] = "[END]"
         words = self.separate(data)
+        print(words)
+        exit()
         self.make_chain(words)
 
     def make_chain(self, words_list):
-        words_list.insert(0, "[START]") # 最初にMARKを入れる
-        words_list.pop() # 最後の謎の空白を削除
-        words_list[-1] = "[END]" # 最後のMARKを入れる
+        # words_list.insert(0, "[START]") # 最初にMARKを入れる
+        # for _ in range(2): words_list.pop() # 最後の謎の空白2こを削除
+        # words_list[-1] = "[END]" # 最後のMARKを入れる
         # print(words_list)
         for i in range(len(words_list)):
             self.root.add(words_list[i:])
@@ -74,8 +82,24 @@ class MarkovTree:
         for path in files:
             with open(path, encoding = "utf-8") as f:
                 s = f.read()
-                s = re.sub("---+[\s\S]---+", "", s)
+                s = self.cut_unneccesarry(s)
+                s = self.replace_spletters(s)
                 self.add_tree(s)
+
+    def cut_unneccesarry(self, s):
+        s = re.sub("---+[\s\S]---+", "", s)
+        s = re.sub("(http|https)://([\w\-]+\.)+[\w\-]+(/[\w\-./?%&=]*)?", "", s)
+        return s
+
+    def replace_spletters(self, data):
+        data = data.replace("&lt;", "<")
+        data = data.replace("&gt;", ">")
+        data = data.replace("&amp;", "&")
+        data = data.replace("&quot;", '"')
+        data = data.replace("&#39;", "'")
+        data = data.replace("&nbsp;", " ")
+        return data
+
 
 if __name__ == "__main__":
     tree = MarkovTree()
