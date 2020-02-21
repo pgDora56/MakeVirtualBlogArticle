@@ -55,18 +55,15 @@ class MarkovTree:
         words = ["[START]"]
         for line in lines:
             words.extend(self.separate(line))
-            words.append("[NEWLINE]")
+            if words[-1].startswith("NEW LINE-"):
+                n = int(words[-1].split("-")[1])
+                words[-1] = f"NEW LINE-{n+1}"
+            else:
+                words.append("NEW LINE-1")
         words[-1] = "[END]"
-        words = self.separate(data)
-        print(words)
-        exit()
         self.make_chain(words)
 
     def make_chain(self, words_list):
-        # words_list.insert(0, "[START]") # 最初にMARKを入れる
-        # for _ in range(2): words_list.pop() # 最後の謎の空白2こを削除
-        # words_list[-1] = "[END]" # 最後のMARKを入れる
-        # print(words_list)
         for i in range(len(words_list)):
             self.root.add(words_list[i:])
 
@@ -76,6 +73,7 @@ class MarkovTree:
         words = []
         for line in lines:
             words.append((re.split('[\t,]', line)[0]))
+        for _ in range(2): words.pop() # 最後の謎の空白2こを削除
         return words
     
     def create(self, files):

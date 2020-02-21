@@ -21,5 +21,13 @@ while snd != "[END]":
 lis.pop()
 
 with open("output.dat", mode = "w", encoding = "utf-8") as f2:
-    f2.write(''.join(lis))
+    m = ""
+    for l in lis:
+        if l.startswith("NEW LINE-"):
+            n = int(l.split("-")[1])
+            for _ in range(n): m += "\n"
+        else:
+            m += l
+    f2.write(m)
+    
 
