@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-import MeCab, re, glob, random
-
+import MeCab, re, glob, random, Database
 
 output = ""
 
@@ -16,7 +15,6 @@ class Word:
         self.count += 1
         if len(words) < 1: return
         if len(words) < self.MAXI_CHAIN - self.deep - 1:
-            # print(f"{len(words)}/{self.MAXI_CHAIN}/{self.deep} -> {words}") 
             return 
         w = words.pop(0)
         if self.deep < self.MAXI_CHAIN - 1:
@@ -44,6 +42,16 @@ class Word:
                 # print(f"HIT")
                 return k
         raise Exception("Tree Counter is broken.")
+
+    def write(self, cnt = 0):
+        thisidx = cnt
+        for key, val in self.nexts.items():
+            cnt += 1
+            db = Database.DB()
+            db.append(cnt, val.count, thisidx, key)
+            db.close()
+            cnt = val.write(cnt)
+        return cnt
 
 class MarkovTree:
     def __init__(self, maxi = 3):
@@ -98,12 +106,16 @@ class MarkovTree:
         data = data.replace("&nbsp;", " ")
         return data
 
+    def write(self):
+        self.root.write(0)
+
 
 if __name__ == "__main__":
     tree = MarkovTree()
     files = glob.glob("output/417/*.txt")
     tree.create(files)
+    tree.write()
 
-    with open("output3.txt", mode = "w", encoding = "utf-8") as f2:
-        f2.write(tree.root.show())
+    # with open("output3.txt", mode = "w", encoding = "utf-8") as f2:
+    #     f2.write(tree.root.show())
 
