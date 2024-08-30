@@ -1,9 +1,12 @@
 # coding:utf-8
 import re, time, requests
+import os
 from bs4 import BeautifulSoup
 
-DIR = f"D:\\Python\\MakeVirtualBlogArticle\\output\\417\\"
+DIR = os.getcwd() + "/output/417/"
 AMEBLO = "https://ameblo.jp"
+
+os.makedirs(DIR)
 
 def getArticlesPage(html):
     urls = [html]
@@ -49,7 +52,7 @@ def scrape(articles):
         html = requests.get(AMEBLO + article["href"]).content
         soup = BeautifulSoup(html, "lxml")
         title = soup.find("a", class_ = "skinArticleTitle").text
-        div_text = soup.find("div", {"class", "skin-entryBody _1ZFA-GPs"})
+        div_text = soup.find("div", {"class", "skin-entryBody _2nkwn0s9"})
         text = getPlainText(str(div_text)).strip()
         # with open(f"{DIR}{str(no).zfill(maxi)}. {title}.txt", "w", encoding="utf-8") as file:
         with open(f"{DIR}{str(no).zfill(maxi)}.txt", "w", encoding="utf-8") as file:

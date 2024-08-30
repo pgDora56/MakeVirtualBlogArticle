@@ -1,6 +1,10 @@
 import glob
+import time
 from Markov import MarkovTree
 
+print("Start")
+
+t = time.time()
 tree = MarkovTree()
 files = glob.glob("output/417/*.txt")
 tree.create(files)
@@ -30,4 +34,4 @@ with open("output.dat", mode = "w", encoding = "utf-8") as f2:
             m += l
     f2.write(m)
     
-
+print(f"End: {time.time() - t}")
